@@ -40,6 +40,8 @@ HeaderFile=lmr096View.h
 ImplementationFile=lmr096View.cpp
 Filter=C
 LastObject=CLmr096View
+BaseClass=CScrollView
+VirtualFilter=VWC
 
 
 [CLS:CMainFrame]
@@ -47,6 +49,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
+LastObject=ID_GRAY
 
 
 
@@ -108,7 +111,7 @@ CommandCount=14
 
 [TB:IDR_MAINFRAME]
 Type=1
-Class=?
+Class=CMainFrame
 Command1=ID_FILE_NEW
 Command2=ID_FILE_OPEN
 Command3=ID_FILE_SAVE
@@ -117,5 +120,6 @@ Command5=ID_EDIT_COPY
 Command6=ID_EDIT_PASTE
 Command7=ID_FILE_PRINT
 Command8=ID_APP_ABOUT
-CommandCount=8
+Command9=ID_GRAY
+CommandCount=9
 

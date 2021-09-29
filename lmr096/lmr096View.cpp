@@ -20,8 +20,8 @@ IMPLEMENT_DYNCREATE(CLmr096View, CScrollView)
 
 BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	//{{AFX_MSG_MAP(CLmr096View)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-		//    DO NOT EDIT what you see in these blocks of generated code!
+	ON_COMMAND(ID_GRAY, OnGray)
+	ON_UPDATE_COMMAND_UI(ID_GRAY, OnUpdateGray)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -127,3 +127,18 @@ CLmr096Doc* CLmr096View::GetDocument() // non-debug version is inline
 
 /////////////////////////////////////////////////////////////////////////////
 // CLmr096View message handlers
+void gray(); //声明一下bmp中写的函数
+void CLmr096View::OnGray() 
+{
+	// TODO: Add your command handler code here
+	gray();  //把24位真彩变成灰度图像
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+}
+
+void CLmr096View::OnUpdateGray(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&24==lpBitsInfo->bmiHeader.biBitCount);//图像加载了&图像是24位真彩
+
+	
+}

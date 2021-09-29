@@ -1,5 +1,5 @@
 #include "stdafx.h"
-BITMAPINFO*   lpBitsInfo=NULL;  //¸ÃÖ¸ÕëºÜÖØÒª£¬Ö±½Ó¶¨Òå³ÉÈ«¾Ö   (BITMAPINFO*==LPBITMAPINFO) NULL±ÜÃâ³ÉÎªÒ°Ö¸Õë
+BITMAPINFO* lpBitsInfo=NULL;  //¸ÃÖ¸ÕëºÜÖØÒª£¬Ö±½Ó¶¨Òå³ÉÈ«¾Ö   (BITMAPINFO*==LPBITMAPINFO) NULL±ÜÃâ³ÉÎªÒ°Ö¸Õë
 
 
 BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼şµ½ÄÚ´æ
@@ -39,7 +39,7 @@ BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼
 	
 	DWORD size=40+PalSize+ImgSize;//×ÜµÄ´óĞ¡
 
-	if(NULL==(lpBitsInfo=(BITMAPINFO*)malloc(size)))//·ÖÅäÄÚ´æ:ĞÅÏ¢Í·¡¢µ÷É«°å¡¢Êµ¼ÊµÄÎ»Í¼Êı¾İ
+	if(NULL==(lpBitsInfo=(BITMAPINFO*)malloc(size)))//·ÖÅäÄÚ´æ(×îºËĞÄ):ĞÅÏ¢Í·¡¢µ÷É«°å¡¢Êµ¼ÊµÄÎ»Í¼Êı¾İ
 		return FALSE;
 	
 	fseek(fp,14,SEEK_SET);//½«ÎÄ¼şÖ¸ÕëÍùÇ°ÒÆ¶¯
@@ -48,4 +48,27 @@ BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼
 	lpBitsInfo->bmiHeader.biClrUsed=NumColors;//½«ÄÚ´æÖĞµÄÊı¾İ»»³É×Ô¸öËãµÄ£¨¸ü·ÅĞÄ£©
 
 	return true;
+}
+
+void gray()
+{
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//Ã¿ĞĞ×Ö½ÚÊı
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //Ö¸ÏòÎ»Í¼Êı¾İµÄÖ¸Õë
+	//ËÄ¾äÊÇÌ×Â·£¬Ã¿´Î¶¼ÒªÓÃ
+	//Ã¿¸öÏñËØµã£¬ÄÚ´æÖĞË³ĞòÊÇBGR
+	int  i,j;
+	BYTE *R,*G,*B,avg; 
+	for(i=0;i<h;i++)
+	{
+		for(j=0;j<w;j++)
+		{ //(i,j)Í¨µÀ¸÷¸ö·ÖÁ¿µÄÖ¸Õë
+			B=lpBits+i*LineBytes+j*3;
+			G=B+1;
+			R=G+1;
+			avg=(*R+*G+*B)/3;
+			*R=*G=*B=avg;
+		}
+	}
 }
