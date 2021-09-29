@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CLmr096Doc
+LastClass=CLmr096View
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "lmr096.h"
@@ -39,6 +39,7 @@ Type=0
 HeaderFile=lmr096View.h
 ImplementationFile=lmr096View.cpp
 Filter=C
+LastObject=CLmr096View
 
 
 [CLS:CMainFrame]

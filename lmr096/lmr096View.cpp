@@ -52,12 +52,27 @@ BOOL CLmr096View::PreCreateWindow(CREATESTRUCT& cs)
 
 /////////////////////////////////////////////////////////////////////////////
 // CLmr096View drawing
-
+extern BITMAPINFO* lpBitsInfo;
 void CLmr096View::OnDraw(CDC* pDC)
 {
 	CLmr096Doc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	// TODO: add draw code for native data here
+	
+	if(NULL==lpBitsInfo)//看看图片是否加载进来
+		return;
+	LPVOID lpBits = 
+		(LPVOID)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];//很简单地获得下面函数参数的一个指针
+
+	//调用显示函数
+	StretchDIBits( 
+		pDC->GetSafeHdc(),
+		0,0,lpBitsInfo->bmiHeader.biWidth,lpBitsInfo->bmiHeader.biHeight,
+		0,0,lpBitsInfo->bmiHeader.biWidth,lpBitsInfo->bmiHeader.biHeight,
+		lpBits, // bitmap bits 
+		lpBitsInfo, // bitmap data 
+		DIB_RGB_COLORS,//色彩模型
+		SRCCOPY); //显示模式：覆盖显示
 }
 
 void CLmr096View::OnInitialUpdate()
