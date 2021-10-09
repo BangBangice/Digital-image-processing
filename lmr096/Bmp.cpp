@@ -1,6 +1,6 @@
 #include "stdafx.h"
 BITMAPINFO* lpBitsInfo=NULL;  //¸ÃÖ¸ÕëºÜÖØÒª£¬Ö±½Ó¶¨Òå³ÉÈ«¾Ö   (BITMAPINFO*==LPBITMAPINFO) NULL±ÜÃâ³ÉÎªÒ°Ö¸Õë
-
+							//¸ÃÖ¸ÕëÖ¸Ïò¶ÁÈ¡µ½ÄÚ´æÖĞµÄËùÓĞµÄÓĞÓÃÎ»Í¼ĞÅÏ¢£¨ÎÄ¼şÍ·Ö®ºóµÄÄÚÈİ£©
 
 BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼şµ½ÄÚ´æ
 {
@@ -21,7 +21,6 @@ BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼
 		case 1:
 			NumColors=2;
 			break;
-		
 		case 4:
 			NumColors=16;
 			break;
@@ -43,9 +42,9 @@ BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼
 		return FALSE;
 	
 	fseek(fp,14,SEEK_SET);//½«ÎÄ¼şÖ¸ÕëÍùÇ°ÒÆ¶¯
-	fread((char*)lpBitsInfo,size,1,fp);//°ÑÎÄ¼şÖĞµÄÊı¾İ¶ÁÈëÄÚ´æ
+	fread((char*)lpBitsInfo,size,1,fp);//°ÑÎÄ¼şÖĞµÄÊı¾İ¶ÁÈëÄÚ´æ  ÎÄ¼şÍ·ÒÔºóµÄËùÓĞĞÅÏ¢
 
-	lpBitsInfo->bmiHeader.biClrUsed=NumColors;//½«ÄÚ´æÖĞµÄÊı¾İ»»³É×Ô¸öËãµÄ£¨¸ü·ÅĞÄ£©
+	lpBitsInfo->bmiHeader.biClrUsed=NumColors;//½«ÄÚ´æÖĞµÄÊı¾İ»»³É×Ô¸ö¸ÕËãµÄ£¨¸ü·ÅĞÄ£©
 
 	return true;
 }
@@ -58,8 +57,35 @@ void gray()
 	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //Ö¸ÏòÎ»Í¼Êı¾İµÄÖ¸Õë
 	//ËÄ¾äÊÇÌ×Â·£¬Ã¿´Î¶¼ÒªÓÃ
 	//Ã¿¸öÏñËØµã£¬ÄÚ´æÖĞË³ĞòÊÇBGR
+
+	BITMAPINFO* lpBitsInfo_2=NULL;  //¶¨ÒåÒ»¸öÎ»Í¼ĞÅÏ¢Ö¸Õë£¬·½±ãÔİ´æĞÂµÄÎ»Í¼ĞÅÏ¢
+
+	DWORD ImgSize=(w*8+31)/32*4*h; //bitcount¸Ä±äÁË£¬Îª8
+	DWORD size=40+256*4+ImgSize;  //»Ò¶ÈÍ¼ÏñµÄµ÷É«°å´óĞ¡¹Ì¶¨Îª256£¬µ÷É«°åÒ»¸öµ¥Î»4byte
+								//ĞÅÏ¢Í·+µ÷É«°å+Î»Í¼Êı¾İ
+
+	lpBitsInfo_2=(BITMAPINFO*)malloc(size); //ÎªĞÂµÄ»Ò¶ÈÍ¼ÏñĞÅÏ¢Ö¸ÕëÉêÇëÄÚ´æ
+
+	memcpy(lpBitsInfo_2,lpBitsInfo,40);//ĞÅÏ¢Í·²»±ä£¬Ö±½Ó¿½±´¹ıÀ´
+
+	lpBitsInfo_2->bmiHeader.biClrUsed=256;
+	lpBitsInfo_2->bmiHeader.biBitCount=8; //ĞŞ¸ÄĞÅÏ¢Í·µÄ»ù´¡ĞÅÏ¢:8Î» 256É«
+
+	BYTE* lpBits_2=(BYTE*)&lpBitsInfo_2->bmiColors[lpBitsInfo_2->bmiHeader.biClrUsed];
+
+	int LineBytes_2 = (w * lpBitsInfo_2->bmiHeader.biBitCount + 31)/32 * 4;//Ã¿ĞĞ×Ö½ÚÊı
+
 	int  i,j;
+	for(i=0;i<256;i++)
+	{
+		lpBitsInfo_2->bmiColors[i].rgbBlue=i;
+		lpBitsInfo_2->bmiColors[i].rgbGreen=i;
+		lpBitsInfo_2->bmiColors[i].rgbRed=i;
+	}
+	//Éú³ÉÒ»¸ö256»Ò¶ÈÍ¼ÏñµÄµ÷É«°å
+	
 	BYTE *R,*G,*B,avg; 
+	BYTE *B_2;  //»Ò¶ÈÍ¼ÏñµÄbitcountÓëÔ­À´µÄ²»Í¬
 	for(i=0;i<h;i++)
 	{
 		for(j=0;j<w;j++)
@@ -68,7 +94,43 @@ void gray()
 			G=B+1;
 			R=G+1;
 			avg=(*R+*G+*B)/3;
-			*R=*G=*B=avg;
+			B_2=lpBits_2+i*LineBytes_2+j;
+			*B_2=avg;			
 		}
 	}
+	//Éú³É»Ò¶ÈÍ¼ÏñµÄÄÚÈİ
+
+	free(lpBitsInfo);  //ÊÍ·Å¾ÉµÄÖ¸ÕëÖ¸ÏòµÄÄÚ´æ
+	lpBitsInfo=lpBitsInfo_2;
+	
 }
+/*
+	switch(biBitCount)
+	{
+		case 24:
+			pixel=lpbits+lineBytes*(h-i-1)+j*3;
+			b=*pixel;
+			g=*(pixel+1);
+			r=*(pixel+2);
+			break;
+		case 8:
+			pixel=lpbits+lineBytes*(h-i-1)+j;
+			r=lpBitInfo->bmpColor[*pixel].rgbRed;
+			g=lpBitInfo->bmpColor[*pixel].rgbGreen;
+			b=lpBitInfo->bmpColor[*pixel].rgbBlue;
+			break;
+		case 4:
+			pixel=lpbits+lineBytes*(h-i-1)+j/2;  //ÕÒµ½¸ÃÏñËØËùÔÚµÄ×Ö½Ú
+			if(j%2) //¸ßËÄÎ»£º>>4
+			else //µÍËÄÎ»£º&00001111
+
+		case 1:
+			pixel=lpbits+lineBytes*(h-i-1)+j/8;  //ÕÒµ½¸ÃÏñËØËùÔÚµÄ×Ö½Ú
+			Byte a=1<<(7-j%8);  //ÅĞ¶ÏÏñËØËùÔÚÎ»:7-j%8
+			Byte bv;
+			bv=(*pexel)&(a);
+			if(bv>0) //Ç°¾°µã
+			else  //±³¾°µã
+			break;
+
+*/

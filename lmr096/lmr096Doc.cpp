@@ -91,4 +91,4 @@ BOOL CLmr096Doc::OnOpenDocument(LPCTSTR lpszPathName)  //ÖªµÀ´ò¿ª¶Ô»°¿òµÄÏìÓ¦º¯Ê
 	// TODO: Add your specialized creation code here
 	LoadBmpFile((char*)lpszPathName);  //Í¨¹ıÏìÓ¦º¯Êı£¨ÏìÓ¦ÁË´ò¿ªµÄÎÄ¼ş£©£¬½«´ò¿ªÎÄ¼şµÄĞÅÏ¢´«Èë´ò¿ªÍ¼Æ¬µÄº¯Êı
 	return TRUE;
-}
+}//DocºóĞø²»ÓÃÔÙĞŞ¸ÄÁË
