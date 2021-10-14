@@ -102,35 +102,87 @@ void gray()
 
 	free(lpBitsInfo);  //释放旧的指针指向的内存
 	lpBitsInfo=lpBitsInfo_2;
-	
 }
-/*
-	switch(biBitCount)
+bool if_gray()
+{
+	bool flag=1;//默认是灰度
+	for(int i=0;i<256;i++)
+		if(lpBitsInfo->bmiColors[i].rgbBlue!=i){
+			flag=0;
+			break;
+		}
+	return flag;
+}  // 1 gray; 0 non gray
+void pixel(int i,int j,char* rgb)
+{
+	if(NULL==lpBitsInfo)
+		return;  //没有图像
+	int w=lpBitsInfo->bmiHeader.biWidth;
+	int h=lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+	
+	if(i>=h||j>=w)
+		return;  //光标超出图像范围
+
+	BYTE *pixel,bv;
+	int r,g,b;
+
+	switch(lpBitsInfo->bmiHeader.biBitCount)
 	{
 		case 24:
-			pixel=lpbits+lineBytes*(h-i-1)+j*3;
+			pixel=lpBits+LineBytes*(h-i-1)+j*3;
 			b=*pixel;
 			g=*(pixel+1);
 			r=*(pixel+2);
+			sprintf(rgb,"R:%d G:%d B:%d",r,g,b);
 			break;
-		case 8:
-			pixel=lpbits+lineBytes*(h-i-1)+j;
-			r=lpBitInfo->bmpColor[*pixel].rgbRed;
-			g=lpBitInfo->bmpColor[*pixel].rgbGreen;
-			b=lpBitInfo->bmpColor[*pixel].rgbBlue;
+		case 8: //分彩色与黑白，需要调色板转换颜色
+			pixel=lpBits+LineBytes*(h-i-1)+j;
+			if(if_gray())
+			{
+				r=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+				sprintf(rgb,"灰度值:%d",r);
+			}
+			else
+			{
+				r=lpBitsInfo->bmiColors[*pixel].rgbRed;
+				g=lpBitsInfo->bmiColors[*pixel].rgbGreen;
+				b=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+				sprintf(rgb,"R:%d G:%d B:%d",r,g,b);
+			}
 			break;
 		case 4:
-			pixel=lpbits+lineBytes*(h-i-1)+j/2;  //找到该像素所在的字节
-			if(j%2) //高四位：>>4
-			else //低四位：&00001111
-
-		case 1:
-			pixel=lpbits+lineBytes*(h-i-1)+j/8;  //找到该像素所在的字节
-			Byte a=1<<(7-j%8);  //判断像素所在位:7-j%8
-			Byte bv;
-			bv=(*pexel)&(a);
-			if(bv>0) //前景点
-			else  //背景点
+			pixel=lpBits+LineBytes*(h-i-1)+j/2;  //找到该像素所在的字节
+			if(j%2) //高四位(前)：>>4
+			{
+				*pixel=*pixel>>4;
+				r=lpBitsInfo->bmiColors[*pixel].rgbRed;
+				g=lpBitsInfo->bmiColors[*pixel].rgbGreen;
+				b=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+			}
+			else //低四位(后)：&00001111
+			{
+				*pixel=*pixel%16;
+				r=lpBitsInfo->bmiColors[*pixel].rgbRed;
+				g=lpBitsInfo->bmiColors[*pixel].rgbGreen;
+				b=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+			}
+			sprintf(rgb,"R:%d G:%d B:%d",r,g,b);
 			break;
+		case 1:
+			pixel=lpBits+LineBytes*(h-i-1)+j/8;  //找到该像素所在的字节
+			bv=(*pixel)&(1<<(7-j%8));  //像素所在位:7-j%8
+			bv=bv>>(7-j%8);
+			if(bv>0) //前景点
+				sprintf(rgb,"灰度值:%d",lpBitsInfo->bmiColors[bv].rgbRed);
+			else  //背景点
+				sprintf(rgb,"灰度值:%d",lpBitsInfo->bmiColors[bv].rgbRed);
+			break;
+	}
+}
+
+/*
+	
 
 */

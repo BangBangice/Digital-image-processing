@@ -51,6 +51,7 @@ protected:
 	//{{AFX_MSG(CLmr096View)
 	afx_msg void OnGray();
 	afx_msg void OnUpdateGray(CCmdUI* pCmdUI);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

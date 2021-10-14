@@ -22,6 +22,7 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	//{{AFX_MSG_MAP(CLmr096View)
 	ON_COMMAND(ID_GRAY, OnGray)
 	ON_UPDATE_COMMAND_UI(ID_GRAY, OnUpdateGray)
+	ON_WM_MOUSEMOVE()
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -141,4 +142,26 @@ void CLmr096View::OnUpdateGray(CCmdUI* pCmdUI)
 	pCmdUI->Enable(lpBitsInfo!=NULL&&24==lpBitsInfo->bmiHeader.biBitCount);//图像加载了&图像是24位真彩
 
 	
+}
+void pixel(int i,int j,char* rgb);
+void CLmr096View::OnMouseMove(UINT nFlags, CPoint point) 
+{
+	// TODO: Add your message handler code here and/or call default
+	//记录坐标值
+	char xy[100];
+	memset(xy,0,100);
+	sprintf(xy,"x:%d y:%d  ",point.x,point.y);
+
+	//记录颜色值
+	char rgb[100];
+	memset(rgb,0,100);
+	pixel(point.y,point.x,rgb);
+
+	//坐标与颜色合并
+	strcat(xy,rgb);
+
+	//在状态栏显示
+	((CFrameWnd*)GetParent())->SetMessageText(xy);
+
+	CScrollView::OnMouseMove(nFlags, point);
 }
