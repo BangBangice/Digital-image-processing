@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CLmr096View
+LastClass=CAboutDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "lmr096.h"
@@ -39,7 +39,7 @@ Type=0
 HeaderFile=lmr096View.h
 ImplementationFile=lmr096View.cpp
 Filter=C
-LastObject=CLmr096View
+LastObject=ID_GRAY
 BaseClass=CScrollView
 VirtualFilter=VWC
 
@@ -49,7 +49,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_GRAY
+LastObject=ID_HISTOGRA
 
 
 
@@ -59,6 +59,7 @@ Type=0
 HeaderFile=lmr096.cpp
 ImplementationFile=lmr096.cpp
 Filter=D
+LastObject=CAboutDlg
 
 [DLG:IDD_ABOUTBOX]
 Type=1
@@ -121,5 +122,6 @@ Command6=ID_EDIT_PASTE
 Command7=ID_FILE_PRINT
 Command8=ID_APP_ABOUT
 Command9=ID_GRAY
-CommandCount=9
+Command10=ID_HISTOGRA
+CommandCount=10
 

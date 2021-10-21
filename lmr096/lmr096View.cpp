@@ -23,6 +23,8 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_COMMAND(ID_GRAY, OnGray)
 	ON_UPDATE_COMMAND_UI(ID_GRAY, OnUpdateGray)
 	ON_WM_MOUSEMOVE()
+	ON_COMMAND(ID_HISTOGRA, OnHistogra)
+	ON_UPDATE_COMMAND_UI(ID_HISTOGRA, OnUpdateHistogra)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -135,11 +137,11 @@ void CLmr096View::OnGray()
 	gray();  //把24位真彩变成灰度图像
 	Invalidate();//刷新屏幕，重新实现Ondraw函数
 }
-
+bool if_gray();
 void CLmr096View::OnUpdateGray(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->Enable(lpBitsInfo!=NULL&&24==lpBitsInfo->bmiHeader.biBitCount);//图像加载了&图像是24位真彩
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(!if_gray()));//图像加载了&图像不是256灰度
 
 	
 }
@@ -164,4 +166,16 @@ void CLmr096View::OnMouseMove(UINT nFlags, CPoint point)
 	((CFrameWnd*)GetParent())->SetMessageText(xy);
 
 	CScrollView::OnMouseMove(nFlags, point);
+}
+
+void CLmr096View::OnHistogra() 
+{
+	// TODO: Add your command handler code here
+	
+}
+
+void CLmr096View::OnUpdateHistogra(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	
 }

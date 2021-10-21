@@ -52,6 +52,8 @@ protected:
 	afx_msg void OnGray();
 	afx_msg void OnUpdateGray(CCmdUI* pCmdUI);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnHistogra();
+	afx_msg void OnUpdateHistogra(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

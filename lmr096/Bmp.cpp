@@ -48,7 +48,7 @@ BOOL LoadBmpFile(char* BmpFileName)//²ÎÊı£ºÂ·¾¶ÃûºÍÎÄ¼şÃû  º¯Êı¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼
 
 	return true;
 }
-
+bool if_gray();
 void gray()
 {
 	int w = lpBitsInfo->bmiHeader.biWidth;
@@ -85,20 +85,84 @@ void gray()
 	//Éú³ÉÒ»¸ö256»Ò¶ÈÍ¼ÏñµÄµ÷É«°å
 	
 	BYTE *R,*G,*B,avg; 
-	BYTE *B_2;  //»Ò¶ÈÍ¼ÏñµÄbitcountÓëÔ­À´µÄ²»Í¬
-	for(i=0;i<h;i++)
+	BYTE *B_2=NULL;  //»Ò¶ÈÍ¼ÏñµÄbitcountÓëÔ­À´µÄ²»Í¬
+	BYTE *pixel,bv;
+	switch(lpBitsInfo->bmiHeader.biBitCount)  //ÅĞ¶ÏĞèÒª¸Ä±äµÄÍ¼ÏñµÄÖÖÀà
 	{
-		for(j=0;j<w;j++)
-		{ //(i,j)Í¨µÀ¸÷¸ö·ÖÁ¿µÄÖ¸Õë
-			B=lpBits+i*LineBytes+j*3;
-			G=B+1;
-			R=G+1;
-			avg=(*R+*G+*B)/3;
-			B_2=lpBits_2+i*LineBytes_2+j;
-			*B_2=avg;			
-		}
+		case 24:   //24Î»Õæ²ÊÉ«
+			for(i=0;i<h;i++)
+			{
+				for(j=0;j<w;j++)
+				{ //(i,j)Í¨µÀ¸÷¸ö·ÖÁ¿µÄÖ¸Õë
+					B=lpBits+i*LineBytes+j*3;
+					G=B+1;
+					R=G+1;
+					avg=(*R+*G+*B)/3;
+					B_2=lpBits_2+i*LineBytes_2+j;
+					*B_2=avg;			
+				}
+			}
+			break;
+		case 8: //256²ÊÉ«
+			if(!if_gray())  //²»ÊÇ»Ò¶ÈÍ¼Ïñ£¬Ğè×ª»»
+			{
+				for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{ //(i,j)Í¨µÀ¸÷¸ö·ÖÁ¿µÄÖ¸Õë
+						pixel=lpBits+i*LineBytes+j;
+						avg=(lpBitsInfo->bmiColors[*pixel].rgbRed+lpBitsInfo->bmiColors[*pixel].rgbGreen+lpBitsInfo->bmiColors[*pixel].rgbBlue)/3;
+						B_2=lpBits_2+i*LineBytes_2+j;
+						*B_2=avg;			
+					}
+				}
+			}
+			else
+				return;
+			break;
+		case 4:   //16Î»É«
+			for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{	//(i,j)Í¨µÀ¸÷¸ö·ÖÁ¿µÄÖ¸Õë
+						pixel=lpBits+LineBytes*i+j/2;
+						B_2=lpBits_2+i*LineBytes_2+j/2;
+						if(j%2) //¸ßËÄÎ»(Ç°)£º>>4
+						{
+							*pixel=*pixel>>4;
+							avg=(lpBitsInfo->bmiColors[*pixel].rgbRed+lpBitsInfo->bmiColors[*pixel].rgbGreen+lpBitsInfo->bmiColors[*pixel].rgbBlue)/3;							
+						}
+						else //µÍËÄÎ»(ºó)£º&00001111
+						{
+							*pixel=*pixel%16;
+							avg=(lpBitsInfo->bmiColors[*pixel].rgbRed+lpBitsInfo->bmiColors[*pixel].rgbGreen+lpBitsInfo->bmiColors[*pixel].rgbBlue)/3;
+						}
+						B_2=lpBits_2+i*LineBytes_2+j;
+						*B_2=avg;
+					}
+				}
+			break;
+		case 1:
+			
+			for(i=0;i<h;i++)
+			{
+				for(j=0;j<w;j++)
+				{ 
+					pixel=lpBits+LineBytes*i+j/8;  //ÕÒµ½¸ÃÏñËØËùÔÚµÄ×Ö½Ú
+					bv=(*pixel)&(1<<(7-j%8));  //ÏñËØËùÔÚÎ»:7-j%8
+						bv=bv>>(7-j%8);
+					if(bv>0) //Ç°¾°µã
+						avg=(lpBitsInfo->bmiColors[bv].rgbRed+lpBitsInfo->bmiColors[bv].rgbGreen+lpBitsInfo->bmiColors[bv].rgbBlue)/3;						
+					else  //±³¾°µã
+						avg=(lpBitsInfo->bmiColors[bv].rgbRed+lpBitsInfo->bmiColors[bv].rgbGreen+lpBitsInfo->bmiColors[bv].rgbBlue)/3;					
+					B_2=lpBits_2+i*LineBytes_2+j;
+					*B_2=avg;
+				}
+			}
+			break;
 	}
 	//Éú³É»Ò¶ÈÍ¼ÏñµÄÄÚÈİ
+
 
 	free(lpBitsInfo);  //ÊÍ·Å¾ÉµÄÖ¸ÕëÖ¸ÏòµÄÄÚ´æ
 	lpBitsInfo=lpBitsInfo_2;
@@ -106,11 +170,13 @@ void gray()
 bool if_gray()
 {
 	bool flag=1;//Ä¬ÈÏÊÇ»Ò¶È
-	for(int i=0;i<256;i++)
-		if(lpBitsInfo->bmiColors[i].rgbBlue!=i){
-			flag=0;
-			break;
-		}
+	//if(lpBitsInfo->bmiHeader.biBitCount==8)  //ÏÈµÃÊÇ8Î»Í¼
+		for(int i=0;i<256;i++)    //¸ù¾İµ÷É«°åÅĞ¶Ï²»ÊÇ256²ÊÉ«
+			if(lpBitsInfo->bmiColors[i].rgbBlue!=i){
+				flag=0;
+				break;
+			}
+	//else flag=0;
 	return flag;
 }  // 1 gray; 0 non gray
 void pixel(int i,int j,char* rgb)
