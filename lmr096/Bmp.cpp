@@ -1,6 +1,8 @@
 #include "stdafx.h"
 BITMAPINFO* lpBitsInfo=NULL;  //¸ÃÖ¸ÕëºÜÖØÒª£¬Ö±½Ó¶¨Òå³ÉÈ«¾Ö   (BITMAPINFO*==LPBITMAPINFO) NULL±ÜÃâ³ÉÎªÒ°Ö¸Õë
 							//¸ÃÖ¸ÕëÖ¸Ïò¶ÁÈ¡µ½ÄÚ´æÖÐµÄËùÓÐµÄÓÐÓÃÎ»Í¼ÐÅÏ¢£¨ÎÄ¼þÍ·Ö®ºóµÄÄÚÈÝ£©
+BITMAPINFO* lpBitsInfo_save=NULL;  //Îªreset×ö±£Áô
+DWORD size_save=0;
 
 BOOL LoadBmpFile(char* BmpFileName)//²ÎÊý£ºÂ·¾¶ÃûºÍÎÄ¼þÃû  º¯Êý¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼þµ½ÄÚ´æ
 {
@@ -40,11 +42,18 @@ BOOL LoadBmpFile(char* BmpFileName)//²ÎÊý£ºÂ·¾¶ÃûºÍÎÄ¼þÃû  º¯Êý¹¦ÄÜ£º¶ÁÈëÕû¸öÎÄ¼
 
 	if(NULL==(lpBitsInfo=(BITMAPINFO*)malloc(size)))//·ÖÅäÄÚ´æ(×îºËÐÄ):ÐÅÏ¢Í·¡¢µ÷É«°å¡¢Êµ¼ÊµÄÎ»Í¼Êý¾Ý
 		return FALSE;
+	if(NULL==(lpBitsInfo_save=(BITMAPINFO*)malloc(size)))//·ÖÅäÄÚ´æ(×îºËÐÄ):ÐÅÏ¢Í·¡¢µ÷É«°å¡¢Êµ¼ÊµÄÎ»Í¼Êý¾Ý
+		return FALSE;
 	
 	fseek(fp,14,SEEK_SET);//½«ÎÄ¼þÖ¸ÕëÍùÇ°ÒÆ¶¯
 	fread((char*)lpBitsInfo,size,1,fp);//°ÑÎÄ¼þÖÐµÄÊý¾Ý¶ÁÈëÄÚ´æ  ÎÄ¼þÍ·ÒÔºóµÄËùÓÐÐÅÏ¢
 
 	lpBitsInfo->bmiHeader.biClrUsed=NumColors;//½«ÄÚ´æÖÐµÄÊý¾Ý»»³É×Ô¸ö¸ÕËãµÄ£¨¸ü·ÅÐÄ£©
+
+	memcpy(lpBitsInfo_save,lpBitsInfo,size);
+	size_save=size;
+	
+
 
 	return true;
 }
@@ -127,15 +136,15 @@ void gray()
 					{	//(i,j)Í¨µÀ¸÷¸ö·ÖÁ¿µÄÖ¸Õë
 						pixel=lpBits+LineBytes*i+j/2;
 						B_2=lpBits_2+i*LineBytes_2+j/2;
-						if(j%2) //¸ßËÄÎ»(Ç°)£º>>4
+						if(!(j%2)) //¸ßËÄÎ»(Ç°)£º>>4
 						{
-							*pixel=*pixel>>4;
-							avg=(lpBitsInfo->bmiColors[*pixel].rgbRed+lpBitsInfo->bmiColors[*pixel].rgbGreen+lpBitsInfo->bmiColors[*pixel].rgbBlue)/3;							
+							bv=*pixel>>4;
+							avg=(lpBitsInfo->bmiColors[bv].rgbRed+lpBitsInfo->bmiColors[bv].rgbGreen+lpBitsInfo->bmiColors[bv].rgbBlue)/3;							
 						}
 						else //µÍËÄÎ»(ºó)£º&00001111
 						{
-							*pixel=*pixel%16;
-							avg=(lpBitsInfo->bmiColors[*pixel].rgbRed+lpBitsInfo->bmiColors[*pixel].rgbGreen+lpBitsInfo->bmiColors[*pixel].rgbBlue)/3;
+							bv=*pixel%16;
+							avg=(lpBitsInfo->bmiColors[bv].rgbRed+lpBitsInfo->bmiColors[bv].rgbGreen+lpBitsInfo->bmiColors[bv].rgbBlue)/3;
 						}
 						B_2=lpBits_2+i*LineBytes_2+j;
 						*B_2=avg;
@@ -150,7 +159,7 @@ void gray()
 				{ 
 					pixel=lpBits+LineBytes*i+j/8;  //ÕÒµ½¸ÃÏñËØËùÔÚµÄ×Ö½Ú
 					bv=(*pixel)&(1<<(7-j%8));  //ÏñËØËùÔÚÎ»:7-j%8
-						bv=bv>>(7-j%8);
+					bv=bv>>(7-j%8);
 					if(bv>0) //Ç°¾°µã
 						avg=(lpBitsInfo->bmiColors[bv].rgbRed+lpBitsInfo->bmiColors[bv].rgbGreen+lpBitsInfo->bmiColors[bv].rgbBlue)/3;						
 					else  //±³¾°µã
@@ -247,6 +256,14 @@ void pixel(int i,int j,char* rgb)
 			break;
 	}
 }
+void reset()
+{	
+	free(lpBitsInfo);
+	lpBitsInfo=(BITMAPINFO*)malloc(size_save);//·ÖÅäÄÚ´æ(×îºËÐÄ):ÐÅÏ¢Í·¡¢µ÷É«°å¡¢Êµ¼ÊµÄÎ»Í¼Êý¾Ý
+	memcpy(lpBitsInfo,lpBitsInfo_save,size_save);
+	
+}
+
 
 /*
 	

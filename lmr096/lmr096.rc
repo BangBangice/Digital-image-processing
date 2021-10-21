@@ -97,6 +97,7 @@ BEGIN
     BUTTON      ID_APP_ABOUT
     BUTTON      ID_GRAY
     BUTTON      ID_HISTOGRA
+    BUTTON      ID_RESET
 END
 
 

@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CAboutDlg
+LastClass=CLmr096View
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "lmr096.h"
@@ -49,7 +49,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_HISTOGRA
+LastObject=ID_RESET
 
 
 
@@ -123,5 +123,6 @@ Command7=ID_FILE_PRINT
 Command8=ID_APP_ABOUT
 Command9=ID_GRAY
 Command10=ID_HISTOGRA
-CommandCount=10
+Command11=ID_RESET
+CommandCount=11
 

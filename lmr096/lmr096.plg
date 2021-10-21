@@ -6,13 +6,7 @@
 --------------------Configuration: lmr096 - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\DEEPBL~1\AppData\Local\Temp\RSP62DE.tmp" with contents
-[
-/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/lmr096.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\lmr096\Digital-image-processing\lmr096\Bmp.cpp"
-]
-Creating command line "cl.exe @C:\Users\DEEPBL~1\AppData\Local\Temp\RSP62DE.tmp" 
-Creating temporary file "C:\Users\DEEPBL~1\AppData\Local\Temp\RSP62DF.tmp" with contents
+Creating temporary file "C:\Users\DEEPBL~1\AppData\Local\Temp\RSPFA4A.tmp" with contents
 [
 /nologo /subsystem:windows /incremental:yes /pdb:"Debug/lmr096.pdb" /debug /machine:I386 /out:"Debug/lmr096.exe" /pdbtype:sept 
 ".\Debug\Bmp.obj"
@@ -23,14 +17,9 @@ Creating temporary file "C:\Users\DEEPBL~1\AppData\Local\Temp\RSP62DF.tmp" with 
 ".\Debug\StdAfx.obj"
 ".\Debug\lmr096.res"
 ]
-Creating command line "link.exe @C:\Users\DEEPBL~1\AppData\Local\Temp\RSP62DF.tmp"
+Creating command line "link.exe @C:\Users\DEEPBL~1\AppData\Local\Temp\RSPFA4A.tmp"
 <h3>Output Window</h3>
-Compiling...
-Bmp.cpp
 Linking...
-Creating command line "bscmake.exe /nologo /o"Debug/lmr096.bsc"  ".\Debug\StdAfx.sbr" ".\Debug\Bmp.sbr" ".\Debug\lmr096.sbr" ".\Debug\lmr096Doc.sbr" ".\Debug\lmr096View.sbr" ".\Debug\MainFrm.sbr""
-Creating browse info file...
-<h3>Output Window</h3>
 
 
 

@@ -25,6 +25,7 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_WM_MOUSEMOVE()
 	ON_COMMAND(ID_HISTOGRA, OnHistogra)
 	ON_UPDATE_COMMAND_UI(ID_HISTOGRA, OnUpdateHistogra)
+	ON_COMMAND(ID_RESET, OnReset)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -177,5 +178,13 @@ void CLmr096View::OnHistogra()
 void CLmr096View::OnUpdateHistogra(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
+	
+}
+void reset();
+void CLmr096View::OnReset() 
+{
+	// TODO: Add your command handler code here
+	reset();  //把24位真彩变成灰度图像
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
 	
 }
