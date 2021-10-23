@@ -2,22 +2,24 @@
 
 [General Info]
 Version=1
-LastClass=CLmr096View
+LastClass=CDlgHistogram
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "lmr096.h"
 LastPage=0
 
-ClassCount=5
+ClassCount=6
 Class1=CLmr096App
 Class2=CLmr096Doc
 Class3=CLmr096View
 Class4=CMainFrame
 
-ResourceCount=2
+ResourceCount=3
 Resource1=IDR_MAINFRAME
 Class5=CAboutDlg
 Resource2=IDD_ABOUTBOX
+Class6=CDlgHistogram
+Resource3=IDD_DIALOG1
 
 [CLS:CLmr096App]
 Type=0
@@ -39,7 +41,7 @@ Type=0
 HeaderFile=lmr096View.h
 ImplementationFile=lmr096View.cpp
 Filter=C
-LastObject=ID_GRAY
+LastObject=CLmr096View
 BaseClass=CScrollView
 VirtualFilter=VWC
 
@@ -49,7 +51,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_RESET
+LastObject=ID_HISTOGRAM
 
 
 
@@ -121,8 +123,24 @@ Command5=ID_EDIT_COPY
 Command6=ID_EDIT_PASTE
 Command7=ID_FILE_PRINT
 Command8=ID_APP_ABOUT
-Command9=ID_GRAY
-Command10=ID_HISTOGRA
-Command11=ID_RESET
+Command9=ID_RESET
+Command10=ID_GRAY
+Command11=ID_HISTOGRAM
 CommandCount=11
+
+[DLG:IDD_DIALOG1]
+Type=1
+Class=CDlgHistogram
+ControlCount=2
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+
+[CLS:CDlgHistogram]
+Type=0
+HeaderFile=DlgHistogram.h
+ImplementationFile=DlgHistogram.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=CDlgHistogram
+VirtualFilter=dWC
 

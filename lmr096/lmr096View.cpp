@@ -6,6 +6,7 @@
 
 #include "lmr096Doc.h"
 #include "lmr096View.h"
+#include "DlgHistogram.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,9 +24,9 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_COMMAND(ID_GRAY, OnGray)
 	ON_UPDATE_COMMAND_UI(ID_GRAY, OnUpdateGray)
 	ON_WM_MOUSEMOVE()
-	ON_COMMAND(ID_HISTOGRA, OnHistogra)
-	ON_UPDATE_COMMAND_UI(ID_HISTOGRA, OnUpdateHistogra)
 	ON_COMMAND(ID_RESET, OnReset)
+	ON_COMMAND(ID_HISTOGRAM, OnHistogram)
+	ON_UPDATE_COMMAND_UI(ID_HISTOGRAM, OnUpdateHistogram)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -169,22 +170,26 @@ void CLmr096View::OnMouseMove(UINT nFlags, CPoint point)
 	CScrollView::OnMouseMove(nFlags, point);
 }
 
-void CLmr096View::OnHistogra() 
-{
-	// TODO: Add your command handler code here
-	
-}
-
-void CLmr096View::OnUpdateHistogra(CCmdUI* pCmdUI) 
-{
-	// TODO: Add your command update UI handler code here
-	
-}
 void reset();
 void CLmr096View::OnReset() 
 {
 	// TODO: Add your command handler code here
 	reset();  //把24位真彩变成灰度图像
 	Invalidate();//刷新屏幕，重新实现Ondraw函数
+	
+}
+
+void CLmr096View::OnHistogram() 
+{
+	// TODO: Add your command handler code here
+	CDlgHistogram dlg;
+	dlg.DoModal();
+	
+}
+
+void CLmr096View::OnUpdateHistogram(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&lpBitsInfo->bmiHeader.biBitCount!=1);//图像加载了，并且不是2值图像
 	
 }

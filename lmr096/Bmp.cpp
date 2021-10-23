@@ -263,6 +263,34 @@ void reset()
 	memcpy(lpBitsInfo,lpBitsInfo_save,size_save);
 	
 }
+DWORD H[256];
+DWORD H_R[256];
+DWORD H_G[256];
+DWORD H_B[256];
+void Histogram()
+{
+	if(!if_gray())
+		return ;
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+	 
+	int i,j;
+	BYTE* pixel;
+	
+	for(i=0;i<256;i++)
+		H[i]=0;  //对直方图数组进行初始化;
+
+	for(i=0;i<h;i++)
+	{
+		for(j=0;j<w;j++)
+		{
+			pixel=lpBits+LineBytes*(h-1-i)+j;
+			H[*pixel]++;
+		}
+	}
+}
 
 
 /*

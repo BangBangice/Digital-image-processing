@@ -94,6 +94,10 @@ SOURCE=.\Bmp.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DlgHistogram.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\lmr096.cpp
 # End Source File
 # Begin Source File
@@ -121,6 +125,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\DlgHistogram.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\lmr096.h
