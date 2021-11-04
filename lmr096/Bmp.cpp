@@ -152,7 +152,6 @@ void gray()
 				}
 			break;
 		case 1:
-			
 			for(i=0;i<h;i++)
 			{
 				for(j=0;j<w;j++)
@@ -231,17 +230,17 @@ void pixel(int i,int j,char* rgb)
 			pixel=lpBits+LineBytes*(h-i-1)+j/2;  //找到该像素所在的字节
 			if(j%2) //高四位(前)：>>4
 			{
-				*pixel=*pixel>>4;
-				r=lpBitsInfo->bmiColors[*pixel].rgbRed;
-				g=lpBitsInfo->bmiColors[*pixel].rgbGreen;
-				b=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+				bv=*pixel>>4;
+				r=lpBitsInfo->bmiColors[bv].rgbRed;
+				g=lpBitsInfo->bmiColors[bv].rgbGreen;
+				b=lpBitsInfo->bmiColors[bv].rgbBlue;
 			}
 			else //低四位(后)：&00001111
 			{
-				*pixel=*pixel%16;
-				r=lpBitsInfo->bmiColors[*pixel].rgbRed;
-				g=lpBitsInfo->bmiColors[*pixel].rgbGreen;
-				b=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+				bv=*pixel%16;
+				r=lpBitsInfo->bmiColors[bv].rgbRed;
+				g=lpBitsInfo->bmiColors[bv].rgbGreen;
+				b=lpBitsInfo->bmiColors[bv].rgbBlue;
 			}
 			sprintf(rgb,"R:%d G:%d B:%d",r,g,b);
 			break;
@@ -269,8 +268,8 @@ DWORD H_G[256];
 DWORD H_B[256];
 void Histogram()
 {
-	if(!if_gray())
-		return ;
+//	if(!if_gray())
+//		return ;
 	int w= lpBitsInfo->bmiHeader.biWidth;
 	int h= lpBitsInfo->bmiHeader.biHeight;
 	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
@@ -278,17 +277,96 @@ void Histogram()
 	 
 	int i,j;
 	BYTE* pixel;
+	int avg,r,g,b,color_index;
 	
 	for(i=0;i<256;i++)
-		H[i]=0;  //对直方图数组进行初始化;
-
-	for(i=0;i<h;i++)
 	{
-		for(j=0;j<w;j++)
-		{
-			pixel=lpBits+LineBytes*(h-1-i)+j;
-			H[*pixel]++;
-		}
+		H[i]=0;  //对直方图数组进行初始化;
+		H_R[i]=0;
+		H_G[i]=0;
+		H_B[i]=0;
+	}
+
+	switch(lpBitsInfo->bmiHeader.biBitCount)
+	{
+		case 24:  //对24真彩色，分别计算各个通道的强度，并求平均通道的强度
+			for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{
+						pixel=lpBits+LineBytes*(h-i-1)+j*3;
+						H_B[*pixel]++;
+						H_G[*(pixel+1)]++;
+						H_R[*(pixel+2)]++;
+						avg=(*pixel+*(pixel+1)+*(pixel+2))/3;
+						H[avg]++;
+					}
+				}
+			break;
+		case 8: //分彩色与黑白，需要调色板转换颜色
+			if(if_gray())   //256灰度
+			{
+				for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{
+						pixel=lpBits+LineBytes*(h-1-i)+j;
+						H[*pixel]++;
+					}
+				}
+			}
+			else   //256彩色
+			{
+				for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{
+						pixel=lpBits+LineBytes*(h-1-i)+j;
+						r=lpBitsInfo->bmiColors[*pixel].rgbRed;
+						g=lpBitsInfo->bmiColors[*pixel].rgbGreen;
+						b=lpBitsInfo->bmiColors[*pixel].rgbBlue;
+						H_B[b]++;
+						H_G[g]++;
+						H_R[r]++;
+						avg=(r+g+b)/3;
+						H[avg]++;
+					}
+				}
+			}
+			break;
+		case 4:
+			for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{
+						pixel=lpBits+LineBytes*(h-i-1)+j/2;  //找到该像素所在的字节
+						if(j%2) //高四位(前)：>>4
+						{
+							color_index=*pixel>>4;
+							r=lpBitsInfo->bmiColors[color_index].rgbRed;
+							g=lpBitsInfo->bmiColors[color_index].rgbGreen;
+							b=lpBitsInfo->bmiColors[color_index].rgbBlue;
+							H_B[b]++;
+							H_G[g]++;
+							H_R[r]++;
+							avg=(r+g+b)/3;
+							H[avg]++;
+						}
+						else //低四位(后)：&00001111
+						{
+							color_index=*pixel%16;
+							r=lpBitsInfo->bmiColors[color_index].rgbRed;
+							g=lpBitsInfo->bmiColors[color_index].rgbGreen;
+							b=lpBitsInfo->bmiColors[color_index].rgbBlue;
+							H_B[b]++;
+							H_G[g]++;
+							H_R[r]++;
+							avg=(r+g+b)/3;
+							H[avg]++;
+						}
+					}
+				}
+			break;
 	}
 }
 
