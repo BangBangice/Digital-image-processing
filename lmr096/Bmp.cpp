@@ -1,8 +1,15 @@
 #include "stdafx.h"
+#include <complex> 
+#include<math.h>
+const double PI = 3.1415926535897932;
 BITMAPINFO* lpBitsInfo=NULL;  //该指针很重要，直接定义成全局   (BITMAPINFO*==LPBITMAPINFO) NULL避免成为野指针
 							//该指针指向读取到内存中的所有的有用位图信息（文件头之后的内容）
 BITMAPINFO* lpBitsInfo_save=NULL;  //为reset做保留
+
+BITMAPINFO* lpDIB_FT=NULL;  //频谱幅度图像
+BITMAPINFO* lpDIB_IFT=NULL;
 DWORD size_save=0;
+using namespace std;
 
 BOOL LoadBmpFile(char* BmpFileName)//参数：路径名和文件名  函数功能：读入整个文件到内存
 {
@@ -369,9 +376,229 @@ void Histogram()
 			break;
 	}
 }
+float range(float intensity)//纠正点运算后的灰度值范围，防止越界
+{
+	if( intensity>255)
+		return 255;
+	else
+		if(intensity<0)
+			return 0;
+		else
+			return intensity;
+}
+void Linear()
+{
+	float la=(float)0.6,lb=(float)20;
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+	 
+	int i,j;
+	BYTE* pixel;
+	int  r,g,b;
 
+	
+	switch(lpBitsInfo->bmiHeader.biBitCount)
+	{
+		case 24:  //对24真彩色，分别计算各个通道的强度，并求平均通道的强度
+			for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+					{
+						pixel=lpBits+LineBytes*(h-i-1)+j*3;
+						*pixel=range(*pixel*la+lb);
+						*(pixel+1)=range(*(pixel+1)*la+lb);
+						*(pixel+2)=range(*(pixel+2)*la+lb);
+					}
+				}
+			break;
+		case 8: //分彩色与黑白，需要调色板转换颜色
+			if(if_gray())   //256灰度
+			{
+				for(i=0;i<h;i++)
+				{
+					for(j=0;j<w;j++)
+						{
+						pixel=lpBits+LineBytes*(h-1-i)+j;
+						*pixel=range(*pixel*la+lb);
+						}
+				}
+			}
+			else   //256彩色
+			{
+				for(i=0;i<256;i++)
+				{
+					
+						r=lpBitsInfo->bmiColors[i].rgbRed;
+						g=lpBitsInfo->bmiColors[i].rgbGreen;
+						b=lpBitsInfo->bmiColors[i].rgbBlue;
+						r=range(r*la+lb);
+						g=range(g*la+lb);
+						b=range(b*la+lb);
+						lpBitsInfo->bmiColors[i].rgbRed=r;
+						lpBitsInfo->bmiColors[i].rgbGreen=g;
+						lpBitsInfo->bmiColors[i].rgbBlue=b;
+					
+				}
+			}
+			break;
+		case 4:
+			for(i=0;i<16;i++)
+				{
+					r=lpBitsInfo->bmiColors[i].rgbRed;
+					g=lpBitsInfo->bmiColors[i].rgbGreen;
+					b=lpBitsInfo->bmiColors[i].rgbBlue;
+					r=range(r*la+lb);
+					g=range(g*la+lb);
+					b=range(b*la+lb);
+					lpBitsInfo->bmiColors[i].rgbRed=r;
+					lpBitsInfo->bmiColors[i].rgbGreen=g;
+					lpBitsInfo->bmiColors[i].rgbBlue=b;	
+				}
+			break;
+	}
+
+
+
+}
+
+void FT(complex<double>*TD,complex<double>*FD,int m)
+{
+	int x,u;
+	double angle;
+	for(u=0;u<m;u++)
+	{
+		FD[u]=0;
+		for(x=0;x<m;x++)
+		{
+			angle=-2*PI*u*x/m;
+			FD[u]+=TD[x]*complex<double>(cos(angle),sin(angle));
+		}
+		FD[u]/=m;
+	}
+}
+
+void IFT(complex<double>*FD,complex<double>*TD,int m)
+{
+	int x,u;
+	double angle;
+	for(x=0;x<m;x++)
+	{
+		FD[x]=0;
+		for(u=0;u<m;u++)
+		{
+			angle=2*PI*u*x/m;
+			TD[x]+=FD[u]*complex<double>(cos(angle),sin(angle));
+		}
+	}
+}
+
+complex<double>* gFD=NULL;
+BOOL is_gFD_OK()
+{
+	return (gFD!=NULL);
+}
+void Fourier()
+{
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+	complex<double>* TD=new complex<double>[w*h];  //空域数据 
+	complex<double>* FD=new complex<double>[w*h];  //频域
+
+	int i,j;
+	BYTE *pixel;
+
+	for(i=0;i<h;i++)   //空域转换为复数
+		{
+			for(j=0;j<w;j++)
+				{
+				pixel=lpBits+LineBytes*(h-1-i)+j;
+				TD[i*w+j]=complex<double>(*pixel,0); //空域里虚部为0
+				//TD[i*w+j]=complex<double>(*pixel*pow(-1,i+j),0)
+				}
+		}
+
+	for(i=0;i<h;i++)
+		 FT(&TD[i*w],&FD[i*w],w);  //水平方向，对每一行进行一维离散傅里叶变换
+
+	for(i=0;i<h;i++)
+		for(j=0;j<w;j++) //在矩阵中，列不方便单独访问，我们先对FD转置，放进TD
+			TD[j*h+i]=FD[i*w+j];
+
+	for(i=0;i<w;i++)
+		 FT(&TD[i*h],&FD[i*h],h);  //垂直方向，对每一列进行一维离散傅里叶变换
+
+	gFD=FD;
+	delete(TD);
+
+	//对FD可视化输出（计算幅值，映射到0-255）
+	LONG size=40+1024+LineBytes*h;
+	lpDIB_FT=(BITMAPINFO* )malloc(size);
+	memcpy(lpDIB_FT,lpBitsInfo,size);
+	lpBits = (BYTE*)&lpDIB_FT->bmiColors[lpDIB_FT->bmiHeader.biClrUsed];
+
+	//计算幅值
+	double temp;
+	for(i=0;i<h;i++)
+	{
+		for(j=0;j<w;j++)
+		{
+			pixel=lpBits+LineBytes*(h-1-i)+j;
+			temp=sqrt(FD[j*h+i].real()*FD[j*h+i].real()+FD[j*h+i].imag()*FD[j*h+i].imag())*2000;
+			
+			//转置的方式访问
+			if (temp > 255 )
+				temp = 255;
+			*pixel=(BYTE)(temp);
+		}
+	}
+}
+void IFourier()
+{
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+	complex<double>* TD=new complex<double>[w*h];  //空域数据 
+	complex<double>* FD=new complex<double>[w*h];  //频域
+
+	int i,j;
+	BYTE *pixel;
+	for(i=0;i<h;i++)
+		for(j=0;j<w;j++)
+			FD[i*w+j]=gFD[h*j+i];
+			
+
+	//对变换回来的TD可视化输出（计算幅值，映射到0-255）
+	LONG size=40+1024+LineBytes*h;
+	lpDIB_IFT=(BITMAPINFO* )malloc(size);
+	memcpy(lpDIB_IFT,lpBitsInfo,size);
+	lpBits = (BYTE*)&lpDIB_IFT->bmiColors[lpDIB_IFT->bmiHeader.biClrUsed];
+
+	//计算幅值
+	double temp=0;
+	for(i=0;i<h;i++)
+	{
+		for(j=0;j<w;j++)
+		{
+			pixel=lpBits+LineBytes*(h-1-i)+j;
+			*pixel=(BYTE)(TD[h*j+i].real()/pow(-1,i+j));  //注意/pow(-1,i+j)   没有的话是白色
+
+			//range(temp);
+			if (temp > 255 )
+				temp = 255;
+			*pixel=(BYTE)(temp);
+		}
+	}
+	delete TD;
+	delete FD;
+	delete gFD;
+}
 
 /*
-	
-
 */

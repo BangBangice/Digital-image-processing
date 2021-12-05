@@ -14,12 +14,13 @@ Class2=CLmr096Doc
 Class3=CLmr096View
 Class4=CMainFrame
 
-ResourceCount=3
-Resource1=IDD_ABOUTBOX
+ResourceCount=4
+Resource1=IDD_DIALOG1
 Class5=CAboutDlg
 Resource2=IDR_MAINFRAME
 Class6=CDlgHistogram
-Resource3=IDD_DIALOG1
+Resource3=IDD_ABOUTBOX
+Resource4=IDD_DIALOG2
 
 [CLS:CLmr096App]
 Type=0
@@ -51,7 +52,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_HISTOGRAM
+LastObject=ID_IFOURIER
 
 
 
@@ -126,7 +127,10 @@ Command8=ID_APP_ABOUT
 Command9=ID_RESET
 Command10=ID_GRAY
 Command11=ID_HISTOGRAM
-CommandCount=11
+Command12=ID_LINEAR
+Command13=ID_FOURIER
+Command14=ID_IFOURIER
+CommandCount=14
 
 [DLG:IDD_DIALOG1]
 Type=1
@@ -143,4 +147,11 @@ BaseClass=CDialog
 Filter=D
 LastObject=CDlgHistogram
 VirtualFilter=dWC
+
+[DLG:IDD_DIALOG2]
+Type=1
+Class=?
+ControlCount=2
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
 

@@ -14,6 +14,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+void Linear();
 /////////////////////////////////////////////////////////////////////////////
 // CLmr096View
 
@@ -27,6 +29,11 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_COMMAND(ID_RESET, OnReset)
 	ON_COMMAND(ID_HISTOGRAM, OnHistogram)
 	ON_UPDATE_COMMAND_UI(ID_HISTOGRAM, OnUpdateHistogram)
+	ON_COMMAND(ID_LINEAR, OnLinear)
+	ON_COMMAND(ID_FOURIER, OnFourier)
+	ON_UPDATE_COMMAND_UI(ID_FOURIER, OnUpdateFourier)
+	ON_COMMAND(ID_IFOURIER, OnIfourier)
+	ON_UPDATE_COMMAND_UI(ID_IFOURIER, OnUpdateIfourier)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -58,6 +65,7 @@ BOOL CLmr096View::PreCreateWindow(CREATESTRUCT& cs)
 /////////////////////////////////////////////////////////////////////////////
 // CLmr096View drawing
 extern BITMAPINFO* lpBitsInfo;
+extern BITMAPINFO* lpDIB_FT; 
 void CLmr096View::OnDraw(CDC* pDC)
 {
 	CLmr096Doc* pDoc = GetDocument();
@@ -78,6 +86,24 @@ void CLmr096View::OnDraw(CDC* pDC)
 		lpBitsInfo, // bitmap data 
 		DIB_RGB_COLORS,//色彩模型
 		SRCCOPY); //显示模式：覆盖显示
+	
+
+	if(lpDIB_FT)   //傅里叶变换图像生成
+	{
+		LPVOID lpBits = 
+		(LPVOID)&lpDIB_FT->bmiColors[lpDIB_FT->bmiHeader.biClrUsed];//很简单地获得下面函数参数的一个指针
+
+	//调用显示函数
+	StretchDIBits( 
+		pDC->GetSafeHdc(),
+		600,0,lpDIB_FT->bmiHeader.biWidth,lpDIB_FT->bmiHeader.biHeight,
+		0,0,lpDIB_FT->bmiHeader.biWidth,lpDIB_FT->bmiHeader.biHeight,
+		lpBits, // bitmap bits 
+		lpDIB_FT, // bitmap data 
+		DIB_RGB_COLORS,//色彩模型
+		SRCCOPY); //显示模式：覆盖显示
+	}
+
 }
 
 void CLmr096View::OnInitialUpdate()
@@ -191,5 +217,43 @@ void CLmr096View::OnUpdateHistogram(CCmdUI* pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(lpBitsInfo!=NULL&&lpBitsInfo->bmiHeader.biBitCount!=1);//图像加载了，并且不是2值图像
+	
+}
+
+void CLmr096View::OnLinear() 
+{
+	// TODO: Add your command handler code here
+	Linear();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+}
+void Fourier();
+void CLmr096View::OnFourier() 
+{
+	printf("!!");
+	// TODO: Add your command handler code here
+	Fourier();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+	
+}
+
+void CLmr096View::OnUpdateFourier(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+	
+}
+void IFourier();
+void CLmr096View::OnIfourier() 
+{
+	// TODO: Add your command handler code here
+	IFourier();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+	
+}
+BOOL is_gFD_OK();
+void CLmr096View::OnUpdateIfourier(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&is_gFD_OK());//有频域数据才能做反变换
 	
 }

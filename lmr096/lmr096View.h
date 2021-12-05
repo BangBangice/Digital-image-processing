@@ -57,6 +57,11 @@ protected:
 	afx_msg void OnReset();
 	afx_msg void OnHistogram();
 	afx_msg void OnUpdateHistogram(CCmdUI* pCmdUI);
+	afx_msg void OnLinear();
+	afx_msg void OnFourier();
+	afx_msg void OnUpdateFourier(CCmdUI* pCmdUI);
+	afx_msg void OnIfourier();
+	afx_msg void OnUpdateIfourier(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
