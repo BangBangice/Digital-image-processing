@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CDlgHistogram
+LastClass=CMainFrame
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "lmr096.h"
@@ -52,7 +52,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_IFOURIER
+LastObject=ID_GRAD
 
 
 
@@ -130,7 +130,11 @@ Command11=ID_HISTOGRAM
 Command12=ID_LINEAR
 Command13=ID_FOURIER
 Command14=ID_IFOURIER
-CommandCount=14
+Command15=ID_AVG
+Command16=ID_RAPLAS
+Command17=ID_MID
+Command18=ID_GRAD
+CommandCount=18
 
 [DLG:IDD_DIALOG1]
 Type=1

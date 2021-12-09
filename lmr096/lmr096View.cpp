@@ -34,6 +34,14 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_FOURIER, OnUpdateFourier)
 	ON_COMMAND(ID_IFOURIER, OnIfourier)
 	ON_UPDATE_COMMAND_UI(ID_IFOURIER, OnUpdateIfourier)
+	ON_COMMAND(ID_AVG, OnAvg)
+	ON_UPDATE_COMMAND_UI(ID_AVG, OnUpdateAvg)
+	ON_COMMAND(ID_RAPLAS, OnRaplas)
+	ON_UPDATE_COMMAND_UI(ID_RAPLAS, OnUpdateRaplas)
+	ON_COMMAND(ID_MID, OnMid)
+	ON_UPDATE_COMMAND_UI(ID_MID, OnUpdateMid)
+	ON_COMMAND(ID_GRAD, OnGrad)
+	ON_UPDATE_COMMAND_UI(ID_GRAD, OnUpdateGrad)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -256,4 +264,62 @@ void CLmr096View::OnUpdateIfourier(CCmdUI* pCmdUI)
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(lpBitsInfo!=NULL&&is_gFD_OK());//有频域数据才能做反变换
 	
+}
+void AverageFilter();
+void CLmr096View::OnAvg() 
+{
+	// TODO: Add your command handler code here
+	AverageFilter();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+	
+}
+
+void CLmr096View::OnUpdateAvg(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+}
+void RaplasSharp();
+void CLmr096View::OnRaplas() 
+{
+	// TODO: Add your command handler code here
+	RaplasSharp();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+
+}
+
+void CLmr096View::OnUpdateRaplas(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+}
+void MedianFilter();
+void CLmr096View::OnMid() 
+{
+	// TODO: Add your command handler code here
+	MedianFilter();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+
+}
+
+void CLmr096View::OnUpdateMid(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+
+	
+}
+void GradSharp();
+void CLmr096View::OnGrad() 
+{
+	// TODO: Add your command handler code here
+	GradSharp();
+	Invalidate();//刷新屏幕，重新实现Ondraw函数
+}
+
+void CLmr096View::OnUpdateGrad(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+
 }

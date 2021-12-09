@@ -101,6 +101,10 @@ BEGIN
     BUTTON      ID_LINEAR
     BUTTON      ID_FOURIER
     BUTTON      ID_IFOURIER
+    BUTTON      ID_AVG
+    BUTTON      ID_RAPLAS
+    BUTTON      ID_MID
+    BUTTON      ID_GRAD
 END
 
 

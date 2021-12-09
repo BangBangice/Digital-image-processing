@@ -62,6 +62,14 @@ protected:
 	afx_msg void OnUpdateFourier(CCmdUI* pCmdUI);
 	afx_msg void OnIfourier();
 	afx_msg void OnUpdateIfourier(CCmdUI* pCmdUI);
+	afx_msg void OnAvg();
+	afx_msg void OnUpdateAvg(CCmdUI* pCmdUI);
+	afx_msg void OnRaplas();
+	afx_msg void OnUpdateRaplas(CCmdUI* pCmdUI);
+	afx_msg void OnMid();
+	afx_msg void OnUpdateMid(CCmdUI* pCmdUI);
+	afx_msg void OnGrad();
+	afx_msg void OnUpdateGrad(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

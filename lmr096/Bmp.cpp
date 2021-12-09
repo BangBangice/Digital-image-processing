@@ -600,5 +600,175 @@ void IFourier()
 	delete gFD;
 }
 
+//模板操作函数
+void Template(int* Array,float coef)
+{
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+	LONG size=40+1024+LineBytes*h;
+	BITMAPINFO* new_lpBitsInfo=(BITMAPINFO* )malloc(size);
+	memcpy(new_lpBitsInfo,lpBitsInfo,size);
+	BYTE* new_lpBits = (BYTE*)&new_lpBitsInfo->bmiColors[new_lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+
+	int i,j,k,l;
+	BYTE *pixel;
+	BYTE *new_pixel;
+	float temp;
+
+	for(i=1;i<h-1;i++)  //边缘不访问
+	{
+		for(j=1;j<w-1;j++)
+		{
+			new_pixel=new_lpBits+LineBytes*(h-1-i)+j;  //指向要运算的新像素的位置
+			temp=0;
+			for(k=0;k<3;k++)  //对每个像素进行，3*3模板运算
+			{
+				for(l=0;l<3;l++)
+				{
+					pixel = lpBits+LineBytes*(h-k-i)+j-1+l;   //遍历顺序：从下到上，从左到右
+					temp+=(*pixel)*Array[k*3+l];   //灰度值*矩阵参数,并累加
+				}
+			}
+			temp*=coef;   //结果*系数
+			if(temp<0)   //归一化 
+				*new_pixel=0;
+			else if(temp>255)
+				*new_pixel=255;
+			else
+				*new_pixel=(BYTE)(temp+0.5);  //四舍五入，更准确
+			
+		}
+	}
+	free(lpBitsInfo);
+	lpBitsInfo=new_lpBitsInfo;   //用新图像替换 原图像
+	
+}
+void AverageFilter()
+{
+	int Array[9];
+	Array[0]=1; Array[1]=1; Array[2]=1;
+	Array[3]=1; Array[4]=1; Array[5]=1;
+	Array[6]=1; Array[7]=1; Array[8]=1;
+	Template(Array,(float)1/9);	
+
+}
+void RaplasSharp()
+{
+	int Array[9];
+	Array[0]=-1; Array[1]=-1; Array[2]=-1;
+	Array[3]=-1; Array[4]=9; Array[5]=-1;
+	Array[6]=-1; Array[7]=-1; Array[8]=-1;
+	Template(Array,(float)1);
+}
+BYTE GetMidNum(BYTE *Array)
+{
+	int i,j,t;
+	/*
+	for(i=0;i<9;i++)
+	{
+		for(j=i;j<8;j++)
+		{
+			if(Array[j]>Array[j+1])
+			{
+				t=Array[j];
+				Array[j]=Array[j+1];
+				Array[j+1]=t;
+			}
+		}
+
+	} 有问题的排序*/ 
+	for(j=0;j<8;j++)
+	{
+		for(i=0;i<8-j;i++)
+		{
+			if(Array[i]>Array[i+1])
+			{
+				t=Array[i];
+				Array[i]=Array[i+1];
+				Array[i+1]=t;
+			}
+		}
+	}
+	return (Array[4]);
+}
+void MedianFilter()
+{
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+	LONG size=40+1024+LineBytes*h;
+	BITMAPINFO* new_lpBitsInfo=(BITMAPINFO* )malloc(size);
+	memcpy(new_lpBitsInfo,lpBitsInfo,size);
+	BYTE* new_lpBits = (BYTE*)&new_lpBitsInfo->bmiColors[new_lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+
+	int i,j,k,l;
+	BYTE *pixel;
+	BYTE *new_pixel;
+	BYTE Value[9];
+
+	for(i=1;i<h-1;i++)  //边缘不访问
+	{
+		for(j=1;j<w-1;j++)
+		{
+			new_pixel=new_lpBits+LineBytes*(h-1-i)+j;  //指向要运算的新像素的位置
+			for(k=0;k<3;k++)  //对每个像素进行，3*3模板运算
+			{
+				for(l=0;l<3;l++)
+				{
+					pixel = lpBits+LineBytes*(h-k-i)+j-1+l;  
+					Value[k*3+l]=*pixel;
+				}
+			}
+			*new_pixel=(BYTE)GetMidNum(Value);
+		}
+	}
+	free(lpBitsInfo);
+	lpBitsInfo=new_lpBitsInfo;   //用新图像替换 原图像
+}
+
+void GradSharp()
+{
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+	LONG size=40+1024+LineBytes*h;
+	BITMAPINFO* new_lpBitsInfo=(BITMAPINFO* )malloc(size);
+	memcpy(new_lpBitsInfo,lpBitsInfo,size);
+	BYTE* new_lpBits = (BYTE*)&new_lpBitsInfo->bmiColors[new_lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
+
+
+	int i,j;
+	BYTE *pixel,*pixel_1,*pixel_2;
+	BYTE *new_pixel;
+	BYTE temp;
+
+	for(i=0;i<h-1;i++)  //边缘不访问
+	{
+		for(j=0;j<w-1;j++)
+		{
+			new_pixel=new_lpBits+LineBytes*(h-1-i)+j;  //指向要运算的新像素的位置
+			pixel=lpBits+LineBytes*(h-1-i)+j;
+			pixel_1=lpBits+LineBytes*(h-1-i)+j+1;
+			pixel_2=lpBits+LineBytes*(h-2-i)+j;
+			temp=abs(*pixel-*pixel_1)+abs(*pixel-*pixel_2);
+			*new_pixel=(BYTE)temp;
+		}
+	}
+	free(lpBitsInfo);
+	lpBitsInfo=new_lpBitsInfo;   //用新图像替换 原图像
+}
+
+
+/*
+*/
 /*
 */
