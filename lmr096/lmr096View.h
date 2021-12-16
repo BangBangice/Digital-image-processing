@@ -70,6 +70,10 @@ protected:
 	afx_msg void OnUpdateMid(CCmdUI* pCmdUI);
 	afx_msg void OnGrad();
 	afx_msg void OnUpdateGrad(CCmdUI* pCmdUI);
+	afx_msg void OnFft();
+	afx_msg void OnUpdateFft(CCmdUI* pCmdUI);
+	afx_msg void OnIfft();
+	afx_msg void OnUpdateIfft(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -105,6 +105,8 @@ BEGIN
     BUTTON      ID_RAPLAS
     BUTTON      ID_MID
     BUTTON      ID_GRAD
+    BUTTON      ID_FFT
+    BUTTON      ID_IFFT
 END
 
 

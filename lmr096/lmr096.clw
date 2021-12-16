@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CMainFrame
+LastClass=CLmr096View
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "lmr096.h"
@@ -15,11 +15,11 @@ Class3=CLmr096View
 Class4=CMainFrame
 
 ResourceCount=4
-Resource1=IDD_DIALOG1
+Resource1=IDR_MAINFRAME
 Class5=CAboutDlg
-Resource2=IDR_MAINFRAME
+Resource2=IDD_ABOUTBOX
 Class6=CDlgHistogram
-Resource3=IDD_ABOUTBOX
+Resource3=IDD_DIALOG1
 Resource4=IDD_DIALOG2
 
 [CLS:CLmr096App]
@@ -42,7 +42,7 @@ Type=0
 HeaderFile=lmr096View.h
 ImplementationFile=lmr096View.cpp
 Filter=C
-LastObject=CLmr096View
+LastObject=ID_FFT
 BaseClass=CScrollView
 VirtualFilter=VWC
 
@@ -52,7 +52,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_GRAD
+LastObject=ID_IFFT
 
 
 
@@ -134,7 +134,9 @@ Command15=ID_AVG
 Command16=ID_RAPLAS
 Command17=ID_MID
 Command18=ID_GRAD
-CommandCount=18
+Command19=ID_FFT
+Command20=ID_IFFT
+CommandCount=20
 
 [DLG:IDD_DIALOG1]
 Type=1

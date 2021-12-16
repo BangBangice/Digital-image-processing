@@ -42,6 +42,10 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_MID, OnUpdateMid)
 	ON_COMMAND(ID_GRAD, OnGrad)
 	ON_UPDATE_COMMAND_UI(ID_GRAD, OnUpdateGrad)
+	ON_COMMAND(ID_FFT, OnFft)
+	ON_UPDATE_COMMAND_UI(ID_FFT, OnUpdateFft)
+	ON_COMMAND(ID_IFFT, OnIfft)
+	ON_UPDATE_COMMAND_UI(ID_IFFT, OnUpdateIfft)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -74,6 +78,7 @@ BOOL CLmr096View::PreCreateWindow(CREATESTRUCT& cs)
 // CLmr096View drawing
 extern BITMAPINFO* lpBitsInfo;
 extern BITMAPINFO* lpDIB_FT; 
+extern BITMAPINFO* lpDIB_IFT; 
 void CLmr096View::OnDraw(CDC* pDC)
 {
 	CLmr096Doc* pDoc = GetDocument();
@@ -108,6 +113,21 @@ void CLmr096View::OnDraw(CDC* pDC)
 		0,0,lpDIB_FT->bmiHeader.biWidth,lpDIB_FT->bmiHeader.biHeight,
 		lpBits, // bitmap bits 
 		lpDIB_FT, // bitmap data 
+		DIB_RGB_COLORS,//色彩模型
+		SRCCOPY); //显示模式：覆盖显示
+	}
+	if(lpDIB_IFT)   //傅里叶变换图像生成
+	{
+		LPVOID lpBits = 
+		(LPVOID)&lpDIB_IFT->bmiColors[lpDIB_IFT->bmiHeader.biClrUsed];//很简单地获得下面函数参数的一个指针
+
+	//调用显示函数
+	StretchDIBits( 
+		pDC->GetSafeHdc(),
+		600,0,lpDIB_IFT->bmiHeader.biWidth,lpDIB_IFT->bmiHeader.biHeight,
+		0,0,lpDIB_IFT->bmiHeader.biWidth,lpDIB_IFT->bmiHeader.biHeight,
+		lpBits, // bitmap bits 
+		lpDIB_IFT, // bitmap data 
 		DIB_RGB_COLORS,//色彩模型
 		SRCCOPY); //显示模式：覆盖显示
 	}
@@ -321,5 +341,50 @@ void CLmr096View::OnUpdateGrad(CCmdUI* pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+
+}
+void FFourier();
+void CLmr096View::OnFft()   //快速傅里叶变换
+{
+	if (lpDIB_FT)
+	{
+		free(lpDIB_FT);
+		lpDIB_FT = NULL;
+	}
+
+	if (lpDIB_IFT)
+	{
+		free(lpDIB_IFT);
+		lpDIB_IFT = NULL;
+	} 
+
+	FFourier();
+	Invalidate();
+}
+void IFFourier();
+void CLmr096View::OnUpdateFft(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&(if_gray()));//图像加载了&图像是256灰度
+
+}
+
+void CLmr096View::OnIfft() 
+{
+	// TODO: Add your command handler code here
+	if (lpDIB_IFT)
+	{
+		free(lpDIB_IFT);
+	lpDIB_IFT = NULL;
+	}
+
+	IFFourier();
+	Invalidate();
+}
+
+void CLmr096View::OnUpdateIfft(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&is_gFD_OK());//有频域数据才能做反变换
 
 }
