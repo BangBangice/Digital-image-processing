@@ -15,11 +15,11 @@ Class3=CLmr096View
 Class4=CMainFrame
 
 ResourceCount=4
-Resource1=IDR_MAINFRAME
+Resource1=IDD_DIALOG1
 Class5=CAboutDlg
-Resource2=IDD_ABOUTBOX
+Resource2=IDR_MAINFRAME
 Class6=CDlgHistogram
-Resource3=IDD_DIALOG1
+Resource3=IDD_ABOUTBOX
 Resource4=IDD_DIALOG2
 
 [CLS:CLmr096App]
@@ -52,7 +52,7 @@ Type=0
 HeaderFile=MainFrm.h
 ImplementationFile=MainFrm.cpp
 Filter=T
-LastObject=ID_IFFT
+LastObject=ID_FFT_FILTER
 
 
 
@@ -136,7 +136,8 @@ Command17=ID_MID
 Command18=ID_GRAD
 Command19=ID_FFT
 Command20=ID_IFFT
-CommandCount=20
+Command21=ID_FFT_FILTER
+CommandCount=21
 
 [DLG:IDD_DIALOG1]
 Type=1

@@ -74,6 +74,8 @@ protected:
 	afx_msg void OnUpdateFft(CCmdUI* pCmdUI);
 	afx_msg void OnIfft();
 	afx_msg void OnUpdateIfft(CCmdUI* pCmdUI);
+	afx_msg void OnFftFilter();
+	afx_msg void OnUpdateFftFilter(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

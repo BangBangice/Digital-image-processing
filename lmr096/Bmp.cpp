@@ -8,6 +8,7 @@ BITMAPINFO* lpBitsInfo_save=NULL;  //为reset做保留
 
 BITMAPINFO* lpDIB_FT=NULL;  //频谱幅度图像
 BITMAPINFO* lpDIB_IFT=NULL;
+
 //BITMAPINFO*  lpDIB_IFFT=NULL;
 DWORD size_save=0;
 using namespace std;
@@ -468,7 +469,7 @@ void FT(complex<double>*TD,complex<double>*FD,int m)
 {
 	int x,u;
 	double angle;
-	for(u=0;u<m;u++)
+	for(u=0;u<m;u++)  //遍历一维数据
 	{
 		FD[u]=0;
 		for(x=0;x<m;x++)
@@ -494,8 +495,7 @@ void IFT(complex<double>*FD,complex<double>*TD,int m)
 		}
 	}
 }
-
-complex<double>* gFD=NULL;
+complex<double>* gFD=NULL;  //频域空间数据
 BOOL is_gFD_OK()
 {
 	return (gFD!=NULL);
@@ -557,13 +557,13 @@ void Fourier()
 			*pixel=(BYTE)(temp);
 		}
 	}
+	delete FD;
 }
 void IFourier()
 {
 	int w= lpBitsInfo->bmiHeader.biWidth;
 	int h= lpBitsInfo->bmiHeader.biHeight;
 	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
-	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
 
 	complex<double>* TD=new complex<double>[w*h];  //空域数据 
 	complex<double>* FD=new complex<double>[w*h];  //频域
@@ -572,39 +572,51 @@ void IFourier()
 	BYTE *pixel;
 	for(i=0;i<h;i++)
 		for(j=0;j<w;j++)
-			FD[i*w+j]=gFD[h*j+i];
+			FD[i*w+j]=gFD[h*j+i];    //将保存的全局频域数据赋值到局部变量
 	for(i=0;i<h;i++)
 		IFT(&FD[i*w],&TD[i*w],w);
 	for(i=0;i<h;i++)
-		FD[j*h+i]=TD[i*w+j];
+		FD[j*h+i]=TD[i*w+j]; //转置FD矩阵  
 	for(i=0;i<w;i++)
 		IFT(&FD[i*h],&TD[i*h],h);
 			
-
+	//debug
+	FILE * fp = fopen("d:\\debug.txt","a");			
+	
 	//对变换回来的TD可视化输出（计算幅值，映射到0-255）
 	LONG size=40+1024+LineBytes*h;
-	lpDIB_IFT=(BITMAPINFO* )malloc(size);
-	memcpy(lpDIB_IFT,lpBitsInfo,size);
-	lpBits = (BYTE*)&lpDIB_IFT->bmiColors[lpDIB_IFT->bmiHeader.biClrUsed];
-
-	//计算幅值
-	double temp=0;
-	for(i=0;i<h;i++)
+	//lpDIB_IFT=(BITMAPINFO*)malloc(size);
+	BITMAPINFO* lpDIB_IFT;
+	lpDIB_IFT = (LPBITMAPINFO) malloc(size);
+	if(fp!=NULL)
 	{
-		for(j=0;j<w;j++)
-		{
-			pixel=lpBits+LineBytes*(h-1-i)+j;
-			*pixel=(BYTE)(TD[h*j+i].real()/pow(-1,i+j));  //注意/pow(-1,i+j)   没有的话是白色
+		fprintf(fp,"SIZE:%d\n",size);
+		fclose(fp);
+	}
+	if (NULL == lpDIB_IFT)
+		return;
+//	memcpy(lpDIB_IFT, lpBitsInfo, size);
+	memcpy(lpDIB_IFT,lpBitsInfo,size);
+	//指向反变换图像数据指针
+	BYTE* lpBits = (BYTE*)&lpDIB_IFT->bmiColors[256];
 
-			//range(temp);
-			if (temp > 255 )
-				temp = 255;
-			*pixel=(BYTE)(temp);
+	//指向反变换图像数据指针
+	double temp;
+	for(i = 0; i < h; i++) // 行
+	{
+		for(j = 0; j < w; j++) // 列
+		{
+			pixel = lpBits + LineBytes * (h - 1 - i) + j;
+			*pixel=(BYTE)(TD[j*h + i].real()/pow(-1,i+j));
+		
 		}
 	}
-	delete TD;
+
+	// 删除临时变量
 	delete FD;
+	delete TD;
 	delete gFD;
+	gFD = NULL;
 }
 
 //模板操作函数
@@ -1050,9 +1062,77 @@ void IFFourier()
 	delete FD;
 	delete TD;
 	delete gFD;
-gFD = NULL;
+	gFD = NULL;
 }
+void FFT_Filter(int D)
+{
+	//1 乘一个滤波器函数
+	//2 更新频谱图像数据
+	//傅里叶反变换
+	int w= lpBitsInfo->bmiHeader.biWidth;
+	int h= lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
 
+
+
+	complex<double>* origin_FD=new complex<double>[w*h];
+	for(int n=0;n<w*h;n++)
+		origin_FD[n]=gFD[n];
+
+	int i,j;
+	double dis; //到圆心的距离
+	for(i=0;i<h;i++)  //边缘不访问
+	{
+		for(j=0;j<w;j++)
+		{
+		dis=sqrt((i-h/2)*(i-h/2)+(j-w/2)*(j-w/2));
+		if(D>0) //low pass
+		{
+			if(dis>D)
+				gFD[i*w+j]=0;
+		}
+		else //high pass
+		{
+			if(dis<-D)
+				gFD[i*w+j]=0;
+		}
+		//巴特沃斯 [B]  [Ga]  
+		//最好做三个按钮
+		/*if(D>0) //low pass
+		{
+				gFD[i*w+j]*=1/（1+pow(dis/D,4));
+		}
+		else //high pass
+		{
+			if(dis<-D)
+				gFD[i*w+j]*=1/(1+pow(-D/dis,4));
+		}
+			*/
+		}
+	
+	}
+
+	double temp;
+	/*for(i = 0; i < h; i++) // 行
+	{
+		for(j = 0; j < w; j++) // 列
+		{
+			pixel = lpBits + LineBytes * (h - 1 - i) + j;
+			temp= (FD[j*h + i].real() / pow(-1, i+j));
+			if (temp < 0)
+				temp = 0;
+			else if (temp >255)
+				temp = 255;
+			*pixel = (int)temp;
+		}
+	}
+*/
+	IFFourier();
+
+	delete gFD;
+	gFD=origin_FD;
+}
 
 /*
 */

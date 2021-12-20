@@ -107,6 +107,7 @@ BEGIN
     BUTTON      ID_GRAD
     BUTTON      ID_FFT
     BUTTON      ID_IFFT
+    BUTTON      ID_FFT_FILTER
 END
 
 

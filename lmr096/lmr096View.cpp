@@ -46,6 +46,8 @@ BEGIN_MESSAGE_MAP(CLmr096View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_FFT, OnUpdateFft)
 	ON_COMMAND(ID_IFFT, OnIfft)
 	ON_UPDATE_COMMAND_UI(ID_IFFT, OnUpdateIfft)
+	ON_COMMAND(ID_FFT_FILTER, OnFftFilter)
+	ON_UPDATE_COMMAND_UI(ID_FFT_FILTER, OnUpdateFftFilter)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -387,4 +389,20 @@ void CLmr096View::OnUpdateIfft(CCmdUI* pCmdUI)
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(lpBitsInfo!=NULL&&is_gFD_OK());//有频域数据才能做反变换
 
+}
+void FFT_Filter(int D);
+void CLmr096View::OnFftFilter() 
+{
+	// TODO: Add your command handler code here
+	FFT_Filter(5);  //5低通，-5高通
+	Invalidate();
+
+}
+
+void CLmr096View::OnUpdateFftFilter(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(lpBitsInfo!=NULL&&is_gFD_OK());//有频域数据才能做滤波
+
+	
 }
