@@ -118,7 +118,8 @@ void CLmr096View::OnDraw(CDC* pDC)
 		DIB_RGB_COLORS,//色彩模型
 		SRCCOPY); //显示模式：覆盖显示
 	}
-	if(lpDIB_IFT)   //傅里叶变换图像生成
+
+	else if(lpDIB_IFT)   //傅里叶变换图像生成
 	{
 		LPVOID lpBits = 
 		(LPVOID)&lpDIB_IFT->bmiColors[lpDIB_IFT->bmiHeader.biClrUsed];//很简单地获得下面函数参数的一个指针

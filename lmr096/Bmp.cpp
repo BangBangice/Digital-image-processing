@@ -464,7 +464,7 @@ void Linear()
 
 
 }
-
+complex<double>* gFD=NULL;  //频域空间数据
 void FT(complex<double>*TD,complex<double>*FD,int m)
 {
 	int x,u;
@@ -480,145 +480,114 @@ void FT(complex<double>*TD,complex<double>*FD,int m)
 		FD[u]/=m;
 	}
 }
-
-void IFT(complex<double>*FD,complex<double>*TD,int m)
-{
-	int x,u;
+void Fourier(){
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+	DWORD LineBytes = (w*lpBitsInfo->bmiHeader.biBitCount+31)/32*4;  //每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];  //指向位图数据的指针
+	
+	complex<double>*TD = new complex<double>[w*h]; //空域数据 
+	complex<double>*FD = new complex<double>[w*h];  //频域
+	
+	int i,j;
+	BYTE*pixel;
+	for(i=0;i<h;i++){   //空域转换为复数
+		for(j=0;j<w;j++){
+			pixel = lpBits + LineBytes * (h-1-i)+j;
+			TD[w*i+j] = complex<double>(*pixel*pow(-1,i+j),0);
+			//TD[w*i+j] = complex<double>(*pixel,0);
+		}
+	}
+	for(i=0;i<h;i++){  //水平方向，对每一行进行一维离散傅里叶变换
+		FT(&TD[i * w],&FD[i * w],w);
+	}
+	for(i=0;i<h;i++){  //在矩阵中，列不方便单独访问，我们先对FD转置，放进TD
+		for(j=0;j<w;j++){
+			TD[h*j+i]=FD[w*i+j];
+		}
+	}
+	for(i=0;i<w;i++){  //垂直方向，对每一列进行一维离散傅里叶变换
+		FT(&TD[i * h],&FD[i * h],h);
+	}
+	DWORD size = 40+1024 + LineBytes * h;
+	lpDIB_FT =(BITMAPINFO*) malloc(size);
+	memcpy(lpDIB_FT,lpBitsInfo,size);
+	lpBits = (BYTE*)&lpDIB_FT->bmiColors[256];
+	double temp=0;
+	//对FD可视化输出（计算幅值，映射到0-255）
+	for(i=0;i<h;i++){
+		for(j=0;j<w;j++){
+			pixel = lpBits + LineBytes * (h-1-i)+j;
+			temp = sqrt(FD[j*h+i].real()*FD[j*h+i].real()+FD[j*h+i].imag()*FD[j*h+i].imag())*1000;
+			if(temp>255)
+				temp = 255;
+			*pixel = (BYTE)temp;
+		}
+	}
+	delete TD;
+	gFD = FD;
+	lpDIB_IFT=NULL;//删除反变换图片
+}
+void IFT(complex<double>*FD,complex<double>*TD,int m){
+	int u,x;
 	double angle;
-	for(x=0;x<m;x++)
-	{
-		TD[x]=0;
-		for(u=0;u<m;u++)
-		{
-			angle=2*PI*u*x/m;
-			TD[x]+=FD[u]*complex<double>(cos(angle),sin(angle));
+	for(u=0;u<m;u++){
+		TD[u]=0;
+		for(x=0;x<m;x++){
+			angle = 2*PI*u*x/m;
+			TD[u]+=FD[x]*complex<double>(cos(angle),sin(angle));
 		}
 	}
 }
-complex<double>* gFD=NULL;  //频域空间数据
+
 BOOL is_gFD_OK()
 {
 	return (gFD!=NULL);
 }
-void Fourier()
-{
-	int w= lpBitsInfo->bmiHeader.biWidth;
-	int h= lpBitsInfo->bmiHeader.biHeight;
-	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
-	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed]; //指向位图数据的指针
 
-	complex<double>* TD=new complex<double>[w*h];  //空域数据 
-	complex<double>* FD=new complex<double>[w*h];  //频域
-
-	int i,j;
-	BYTE *pixel;
-
-	for(i=0;i<h;i++)   //空域转换为复数
-		{
-			for(j=0;j<w;j++)
-				{
-				pixel=lpBits+LineBytes*(h-1-i)+j;
-				//TD[i*w+j]=complex<double>(*pixel,0); //空域里虚部为0
-				TD[i*w+j]=complex<double>(*pixel*pow(-1,i+j),0);
-				}
-		}
-
-	for(i=0;i<h;i++)
-		 FT(&TD[i*w],&FD[i*w],w);  //水平方向，对每一行进行一维离散傅里叶变换
-
-	for(i=0;i<h;i++)
-		for(j=0;j<w;j++) //在矩阵中，列不方便单独访问，我们先对FD转置，放进TD
-			TD[j*h+i]=FD[i*w+j];
-
-	for(i=0;i<w;i++)
-		 FT(&TD[i*h],&FD[i*h],h);  //垂直方向，对每一列进行一维离散傅里叶变换
-
-	gFD=FD;
-	delete(TD);
-
-	//对FD可视化输出（计算幅值，映射到0-255）
-	LONG size=40+1024+LineBytes*h;
-	lpDIB_FT=(BITMAPINFO* )malloc(size);
-	memcpy(lpDIB_FT,lpBitsInfo,size);
-	lpBits = (BYTE*)&lpDIB_FT->bmiColors[lpDIB_FT->bmiHeader.biClrUsed];
-
-	//计算幅值
-	double temp;
-	for(i=0;i<h;i++)
-	{
-		for(j=0;j<w;j++)
-		{
-			pixel=lpBits+LineBytes*(h-1-i)+j;
-			temp=sqrt(FD[j*h+i].real()*FD[j*h+i].real()+FD[j*h+i].imag()*FD[j*h+i].imag())*2000;
-			
-			//转置的方式访问
-			if (temp > 255 )
-				temp = 255;
-			*pixel=(BYTE)(temp);
-		}
-	}
-	delete FD;
-}
-void IFourier()
-{
-	int w= lpBitsInfo->bmiHeader.biWidth;
-	int h= lpBitsInfo->bmiHeader.biHeight;
-	int LineBytes = (w * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;//每行字节数
-
-	complex<double>* TD=new complex<double>[w*h];  //空域数据 
-	complex<double>* FD=new complex<double>[w*h];  //频域
-
-	int i,j;
-	BYTE *pixel;
-	for(i=0;i<h;i++)
-		for(j=0;j<w;j++)
-			FD[i*w+j]=gFD[h*j+i];    //将保存的全局频域数据赋值到局部变量
-	for(i=0;i<h;i++)
-		IFT(&FD[i*w],&TD[i*w],w);
-	for(i=0;i<h;i++)
-		FD[j*h+i]=TD[i*w+j]; //转置FD矩阵  
-	for(i=0;i<w;i++)
-		IFT(&FD[i*h],&TD[i*h],h);
-			
-	//debug
-	FILE * fp = fopen("d:\\debug.txt","a");			
+void IFourier(){
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+	DWORD LineBytes = (w*lpBitsInfo->bmiHeader.biBitCount+31)/32*4;  //每行字节数
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 	
-	//对变换回来的TD可视化输出（计算幅值，映射到0-255）
-	LONG size=40+1024+LineBytes*h;
-	//lpDIB_IFT=(BITMAPINFO*)malloc(size);
-	BITMAPINFO* lpDIB_IFT;
-	lpDIB_IFT = (LPBITMAPINFO) malloc(size);
-	if(fp!=NULL)
-	{
-		fprintf(fp,"SIZE:%d\n",size);
-		fclose(fp);
-	}
-	if (NULL == lpDIB_IFT)
-		return;
-//	memcpy(lpDIB_IFT, lpBitsInfo, size);
-	memcpy(lpDIB_IFT,lpBitsInfo,size);
-	//指向反变换图像数据指针
-	BYTE* lpBits = (BYTE*)&lpDIB_IFT->bmiColors[256];
+	complex<double>*TD = new complex<double>[w*h]; //空域数据 
+	complex<double>*FD = new complex<double>[w*h];  //频域
+	 
+	int i,j;
+	BYTE*pixel;
+	
+	for(i=0;i<h;i++)
+		for(j=0;j<w;j++)
+			FD[w*i+j] = gFD[w*i+j];    //将保存的全局频域数据赋值到局部变量
 
-	//指向反变换图像数据指针
-	double temp;
-	for(i = 0; i < h; i++) // 行
-	{
-		for(j = 0; j < w; j++) // 列
-		{
-			pixel = lpBits + LineBytes * (h - 1 - i) + j;
-			*pixel=(BYTE)(TD[j*h + i].real()/pow(-1,i+j));
-		
+	for(i=0;i<h;i++){
+		IFT(&FD[i * w],&TD[i * w],w);
+	}
+	for(i=0;i<h;i++){
+		for(j=0;j<w;j++){
+			FD[h*j+i]=TD[w*i+j];   //转置FD矩阵  
 		}
 	}
-
-	// 删除临时变量
-	delete FD;
+	for(i=0;i<w;i++){
+		IFT(&FD[i * h],&TD[i * h],h);
+	}
+	DWORD size = 40+1024 + LineBytes * h;
+	lpDIB_IFT =(BITMAPINFO*) malloc(size);
+	memcpy(lpDIB_IFT,lpBitsInfo,size);
+	lpBits = (BYTE*)&lpDIB_IFT->bmiColors[256];
+	for(i=0;i<h;i++){
+		for(j=0;j<w;j++){
+			pixel = lpBits + LineBytes * (h-1-i)+j;
+			//*pixel = (BYTE)TD[w*i+j].real();
+			*pixel = (BYTE)(TD[w*i+j].real()/pow(-1,i+j));
+		}
+	}
 	delete TD;
-	delete gFD;
-	gFD = NULL;
+	delete FD;
+	gFD=NULL;
+	lpDIB_FT=NULL;  //反变换后删除频域图像，避免显示不出来
 }
-
 //模板操作函数
 void Template(int* Array,float coef)
 {
@@ -953,6 +922,7 @@ void FFourier()
 	}
 
 	gFD=FD;
+	lpDIB_IFT=NULL;
 
 }
 //IFFT反变换
@@ -1063,6 +1033,7 @@ void IFFourier()
 	delete TD;
 	delete gFD;
 	gFD = NULL;
+	lpDIB_FT=NULL;
 }
 void FFT_Filter(int D)
 {

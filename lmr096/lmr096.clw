@@ -15,11 +15,11 @@ Class3=CLmr096View
 Class4=CMainFrame
 
 ResourceCount=4
-Resource1=IDD_DIALOG1
+Resource1=IDR_MAINFRAME
 Class5=CAboutDlg
-Resource2=IDR_MAINFRAME
+Resource2=IDD_ABOUTBOX
 Class6=CDlgHistogram
-Resource3=IDD_ABOUTBOX
+Resource3=IDD_DIALOG1
 Resource4=IDD_DIALOG2
 
 [CLS:CLmr096App]
